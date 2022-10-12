@@ -85,15 +85,16 @@ void loop(){
   //Send an HTTP POST request every 10 seconds
   delay(20000);
   if(WiFi.status()== WL_CONNECTED){
-    Serial.println("Conectado y empezando..."); //--
+    Serial.println("Entrado en el if-statement, check"); //--
     HTTPClient http;
     WiFiClient client;
 
     String url = "/TX.php?" ;
     String body = "un=1&id=99999&pw='Password123456-'&n1=";
-    body += String(T_inside);
+    body += String(15); //-- deberia ser T_inside
     Serial.println(url); //--
     Serial.println(body); //--
+    Serial.println(host); //--
     client.println(String("GET ") + url + body + " HTTP/1.1");   //if this doesnt work, try POST
     client.println(String("Host: ") + host);
     client.println("Connection: close");
@@ -101,7 +102,7 @@ void loop(){
     //client.println(body.length());
     client.println();
     //client.println(body);
-
+    Serial.println(Acaba de pasar el packet); //--
     // Wait for the response
     unsigned long timeout = millis();
     while (client.available() == 0) {
