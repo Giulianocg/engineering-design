@@ -75,14 +75,16 @@ void setup(){
 
 void loop(){
   //get the temperature from the resistance
-  float voltage = analogRead(A0);
+  Serial.println("Ha entrado en el loop"); //-- 
+  //float voltage = analogRead(A0); //--
+  float voltage = 4; //--
   voltage = voltage / 1024;
   float totalResistance = ((Vcc * R2) / voltage) - R2;
   float resistance = (totalResistance - R1) * 1000;
   T_inside = resistanceToCelsius(resistance);
   //Light = analogRead();
 
-  //Send an HTTP POST request every 10 seconds
+  //Send an HTTP POST request every 20 seconds
   delay(20000);
   if(WiFi.status()== WL_CONNECTED){
     Serial.println("Entrado en el if-statement, check"); //--
@@ -102,7 +104,7 @@ void loop(){
     //client.println(body.length());
     client.println();
     //client.println(body);
-    Serial.println(Acaba de pasar el packet); //--
+    Serial.println("Acaba de pasar el packet"); //--
     // Wait for the response
     unsigned long timeout = millis();
     while (client.available() == 0) {
