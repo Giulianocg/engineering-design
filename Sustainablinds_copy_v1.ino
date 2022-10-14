@@ -9,8 +9,8 @@
 
 ESP8266WiFiMulti WiFiMulti;
 
-const char* Wifi_name = "";                                             //fill this in!!!!
-const char* Wifi_pass = ""; 
+const char* Wifi_name = "Alonso";                                             //fill this in!!!!
+const char* Wifi_pass = "onetwothree"; 
 const char* host = "engdesblinds.000webhostapp.com";
 
 // variables to send
@@ -46,7 +46,7 @@ float resistanceToCelsius(float resistance) {
 
 void setup(){
   //pinmodes A0 is LDR and .. is Thermistor
-  pinMode(A0, INPUT);
+  pinMode(14, INPUT);
   //pinMode(, input); // fill this in ++++
 
   //internet connection
@@ -75,7 +75,7 @@ void loop(){
   voltage = voltage / 1024;
   float totalResistance = ((Vcc * R2) / voltage) - R2;
   float resistance = (totalResistance - R1) * 1000;
-  T_inside = resistanceToCelsius(resistance);
+  T_inside = digitalRead(14); //resistanceToCelsius(resistance);
   //Light = analogRead();
 
   //Send an HTTP POST request every 20 seconds
@@ -112,30 +112,31 @@ void loop(){
     // Read the reply and print it out
     Serial.println("Got response:");
     if (client.available()){
-      cont char* c = client.read(); //StringUntil('\r') line should be something like 436##1##1##1##20##3.6, otherwise i think i know what might have gone wrong
-      String line = c;
+      char c = client.read(); //StringUntil('\r') line should be something like 436##1##1##1##20##3.6, otherwise i think i know what might have gone wrong
+      String line(1, c);
       Serial.print(line);
 
-      std::string arrayyy[6]; //we put the data into each variable
+      String arrayyy[6]; //we put the data into each variable
       int icounter = 0;
-      std::string delimiter = "##";
+      String delimiter = "##";
       size_t pos = 0;
-      std::string token;
-      while ((pos = line.find(delimiter)) != std::string::npos) {
-          token = line.substr(0, pos);
+      String token;
+      while ((pos = line.indexOf(delimiter)) != std::string::npos) {
+          token = line.substring(0, pos);
           arrayyy[icounter] = token;
           icounter = icounter + 1;
-          line.erase(0, pos + delimiter.length());
+          line.remove(0, pos + delimiter.length());
       }
       arrayyy[icounter] = line;
 
-      Time = stoi(arrayyy[0]);
-      Open = stoi(arrayyy[1]);
-      Side = stoi(arrayyy[2]);
-      Auto = stoi(arrayyy[3]);
-      T_target = stoi(arrayyy[4]);
-      T_outside = std::stof(arrayyy[5]); //with that, we should have all our data
-      Serial.print("Time: " + Time + "Mode: " + Open + "Side: " + Side + "Auto: " + Auto + "T_target: " + T_target + "T_outside: " + T_outside  );
+      Serial.print("Time: " + arrayyy[0] + "Mode: " + arrayyy[1] + "Side: " + arrayyy[2] + "Auto: " + arrayyy[3] + "T_target: " + arrayyy[4] + "T_outside: " + arrayyy[5]  );
+      Time = arrayyy[0].toInt();
+      Open = arrayyy[1].toInt();
+      Side = arrayyy[2].toInt();
+      Auto = arrayyy[3].toInt();
+      T_target = arrayyy[4].toInt();
+      T_outside = arrayyy[5].toInt(); //with that, we should have all our data
+      
       //       Here we do the actual logic for the blinds
 
 
