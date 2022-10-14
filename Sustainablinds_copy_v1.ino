@@ -4,6 +4,9 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 
+#include <iostream>
+#include <string>
+
 ESP8266WiFiMulti WiFiMulti;
 
 const char* Wifi_name = "";                                             //fill this in!!!!
@@ -13,23 +16,14 @@ const char* host = "engdesblinds.000webhostapp.com";
 // variables to send
 bool Status = 0;
 int T_inside = 0;
-bool Light = 0;
+int Light = 0;
 //vars to receive
-bool Open = 0;
-bool Side = 0;
-bool Auto = 0;
+int Time = 0;
+int Open = 0;
+int Side = 0;
+int Auto = 0;
 int T_target = 0;
-int T_outside = 0;
-
-//variables to store
-char d1_from_ESP[2];
-//define keywords to fetch data
-const char keyword_b1[] = "b1";
-const char keyword_b2[] = "b2";
-const char keyword_b3[] = "b3";
-const char keyword_n1[] = "n1";
-const char keyword_n2[] = "n2";
-const char keyword_doublehash[] = "##";
+float T_outside = 0;
 
 
 //Define our functions::
@@ -117,9 +111,46 @@ void loop(){
 
     // Read the reply and print it out
     Serial.println("Got response:");
-    while (client.available()){
-      String line = client.readStringUntil('\r'); //line should be something like _t1436##_b11##_b21##_b31##_n120##_n23.6##, otherwise i think i know what might have gone wrong
+    if (client.available()){
+      String line = client.read(); //StringUntil('\r') line should be something like _t1436##_b11##_b21##_b31##_n120##_n23.6##, otherwise i think i know what might have gone wrong
       Serial.print(line);
+
+      std::string arrayyy[6]; //we put the data into each variable
+      int icounter = 0;
+      std::string delimiter = "##";
+      size_t pos = 0;
+      std::string token;
+      while ((pos = line.find(delimiter)) != std::string::npos) {
+          token = line.substr(0, pos);
+          std::cout << token << std::endl;
+          std::cout << icounter << std::endl;
+          arrayyy[icounter] = token;
+          icounter = icounter + 1;
+          line.erase(0, pos + delimiter.length());
+      }
+      arrayyy[icounter] = line;
+
+      Time = stoi(arrayyy[0]);
+      Open = stoi(arrayyy[1]);
+      Side = stoi(arrayyy[2]);
+      Auto = stoi(arrayyy[3]);
+      T_target = stoi(arrayyy[4]);
+      T_outside = std::stof(arrayyy[5]); //with that, we should have all our data
+
+      //       Here we do the actual logic for the blinds
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
     Serial.println();
 
