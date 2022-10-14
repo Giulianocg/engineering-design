@@ -1,4 +1,5 @@
 #include <AccelStepper.h>
+#include <dhtnew.h>
 
 const int revolution = 4096;  
 //motor steps for a full revolution
@@ -11,17 +12,18 @@ int prevposition = 1;
 //must be updated before position is. Starts assuming blinds in open position
 int position = 2;
 //0 is cold side, 1 is open, 2 is warm side.
-int targettemp = 25;
-int temp = 25;
+int targettemp = 0;
+int temp = 30;
 //as determind by temperature sensor
 bool light = true;
 // variable for if the sun is out as determined by light sensor
 int mode = 1;
-// 0 = manual, 1 = by target temp, 2 = automatic
+// 0 = automatic, 1 = by target temp, 2 = manual
 const int revsbtwnstates = 2; 
 // revolutions of motor needed between states, ie from cold to open and open to warm
 
 AccelStepper motor(AccelStepper::HALF4WIRE, in1, in3, in2, in4);
+DHTNEW tempsensor(14);
 
 void setup() {
   motor.setAcceleration(100);
@@ -33,14 +35,13 @@ void loop() {
   if (mode = 0) {
     position = automode();
   }
-  if (mode = 1) {
+  else if (mode = 1) {
     position = tempmode();
   }
-  if (mode = 2) {
+  else if (mode = 2) {
     position = manualmode();
   }
   //check which mode it is in and runs the corresponding function
-
   if (position != prevposition) {
     motor.moveTo((position-prevposition)*revsbtwnstates*revolution);
   }
@@ -52,6 +53,9 @@ void loop() {
 }
 
 int tempmode() {
+  tempsensor.read();
+  temp = (tempsensor.getTemperature())/10;
+  Serial.println(tempsensor.getTemperature(), 1);
   if (temp < targettemp) {
     return 2; 
   }
@@ -65,10 +69,10 @@ int tempmode() {
 }
 
 int automode() {
-  if (sun = true) {
+  if (light = true) {
     return 1;
   }
-  if (sun = false) {
+  if (light = false) {
     return 0; 
     // It might be annoying to have the reflective side inside so I decided to have it facing out at night.
   }
