@@ -112,7 +112,8 @@ void loop(){
     // Read the reply and print it out
     Serial.println("Got response:");
     if (client.available()){
-      String line = client.read(); //StringUntil('\r') line should be something like _t1436##_b11##_b21##_b31##_n120##_n23.6##, otherwise i think i know what might have gone wrong
+      cont char* c = client.read(); //StringUntil('\r') line should be something like 436##1##1##1##20##3.6, otherwise i think i know what might have gone wrong
+      String line = c;
       Serial.print(line);
 
       std::string arrayyy[6]; //we put the data into each variable
