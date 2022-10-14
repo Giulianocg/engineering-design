@@ -123,8 +123,6 @@ void loop(){
       std::string token;
       while ((pos = line.find(delimiter)) != std::string::npos) {
           token = line.substr(0, pos);
-          std::cout << token << std::endl;
-          std::cout << icounter << std::endl;
           arrayyy[icounter] = token;
           icounter = icounter + 1;
           line.erase(0, pos + delimiter.length());
@@ -137,7 +135,7 @@ void loop(){
       Auto = stoi(arrayyy[3]);
       T_target = stoi(arrayyy[4]);
       T_outside = std::stof(arrayyy[5]); //with that, we should have all our data
-
+      Serial.print("Time: " + Time + "Mode: " + Open + "Side: " + Side + "Auto: " + Auto + "T_target: " + T_target + "T_outside: " + T_outside  );
       //       Here we do the actual logic for the blinds
 
 
