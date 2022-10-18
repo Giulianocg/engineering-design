@@ -174,26 +174,32 @@ void loop(){
       //--------Here we do the actual logic for the blinds--------------------------------------------------------------------------------
       
       if (Auto == 1){ //Automatic mode
-        if (Light > 100){ //100 is just an example i dint know what the cutoff is
-          
-
-
+        if (Light > 40){ //100 is just an example i dint know what the cutoff is
+          If (T_inside > T_target){
+            // close on reflective ****
+          }
+          else if (T_inside < T_target){
+            // open ****
+          }
+          else {
+            continue;
+          }
         }
-        else if (Light <= 100){
-          // close blinds on whatever side we decide during the night ****
+        else if (Light <= 40){
+          // close blinds on absorbant ****
         }
 
       }
       else if (Auto == 0){ //manual mode
         if (Open = 1){
-          //put motor on open, dont know how you are doing this ****
+          //open ****
         }
         else if (Open = 0){
           if (Side = 0){ //reflect
-            //put the motor closed on reflect ****
+            //closed on reflect ****
           }
           else if (Side = 1){ //Absorb
-            // put the motor closed on absorb ****
+            // closed on absorb ****
           }          
         }
       }
