@@ -7,6 +7,9 @@
 #include <iostream>
 #include <string>
 
+#include <AccelStepper.h>
+#include <dhtnew.h>
+
 ESP8266WiFiMulti WiFiMulti;
 
 const char* Wifi_name = "Alonso";                                             //fill this in!!!!
@@ -25,6 +28,33 @@ int Auto = 0;
 int T_target = 0;
 float T_outside = 0;
 
+//-----------------------------------------------------------------------your stuff--------------------------------------
+
+const int revolution = 4096;  
+//motor steps for a full revolution
+const int in1 = 5;
+const int in2 = 4;
+const int in3 = 0;
+const int in4 = 2 ;
+//pins on motor driver connected to micro controller
+int prevposition = 1;
+//must be updated before position is. Starts assuming blinds in open position
+int position = 2;
+//0 is cold side, 1 is open, 2 is warm side.
+int targettemp = 0;
+int temp = 30;
+//as determind by temperature sensor
+bool light = true;
+// variable for if the sun is out as determined by light sensor
+int mode = 1;
+// 0 = automatic, 1 = by target temp, 2 = manual
+const int revsbtwnstates = 2; 
+// revolutions of motor needed between states, ie from cold to open and open to warm
+
+AccelStepper motor(AccelStepper::HALF4WIRE, in1, in3, in2, in4);
+DHTNEW tempsensor(14);
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
 //Define our functions::
 // Converts resistance (in ohms) to temperature (in deg C)
@@ -45,6 +75,10 @@ float resistanceToCelsius(float resistance) {
 
 
 void setup(){
+  //----------------------------------------------------------------
+  motor.setAcceleration(100);
+  motor.setMaxSpeed(500);
+  //-------------------------------------------------------------------
   //pinmodes A0 is LDR and .. is Thermistor
   pinMode(14, INPUT);
   //pinMode(, input); // fill this in ++++
@@ -137,20 +171,35 @@ void loop(){
       T_target = arrayyy[4].toInt();
       T_outside = arrayyy[5].toInt(); //with that, we should have all our data
       
-      //       Here we do the actual logic for the blinds
+      //--------Here we do the actual logic for the blinds--------------------------------------------------------------------------------
+      
+      if (Auto == 1){ //Automatic mode
+        if (Light > 100){ //100 is just an example i dint know what the cutoff is
+          
 
 
+        }
+        else if (Light <= 100){
+          // close blinds on whatever side we decide during the night ****
+        }
+
+      }
+      else if (Auto == 0){ //manual mode
+        if (Open = 1){
+          //put motor on open, dont know how you are doing this ****
+        }
+        else if (Open = 0){
+          if (Side = 0){ //reflect
+            //put the motor closed on reflect ****
+          }
+          else if (Side = 1){ //Absorb
+            // put the motor closed on absorb ****
+          }          
+        }
+      }
 
 
-
-
-
-
-
-
-
-
-
+      //-------------------------------------------------------------------------------------------------------------------------------------
     }
     Serial.println();
 
