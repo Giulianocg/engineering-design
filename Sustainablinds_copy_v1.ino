@@ -32,22 +32,15 @@ float T_outside = 0;
 
 const int revolution = 4096;  
 //motor steps for a full revolution
-const int in1 = 5;
-const int in2 = 4;
-const int in3 = 0;
-const int in4 = 2 ;
+const int in1 = 12; //D6
+const int in2 = 13; //D7
+const int in3 = 4; //D2
+const int in4 = 5; //D1
 //pins on motor driver connected to micro controller
 int prevposition = 1;
 //must be updated before position is. Starts assuming blinds in open position
-int position = 2;
-//0 is cold side, 1 is open, 2 is warm side.
-int targettemp = 0;
-int temp = 30;
-//as determind by temperature sensor
-bool light = true;
-// variable for if the sun is out as determined by light sensor
-int mode = 1;
-// 0 = automatic, 1 = by target temp, 2 = manual
+int position = 1;
+//0 is reflective, 1 is open, 2 is absorbent.
 const int revsbtwnstates = 2; 
 // revolutions of motor needed between states, ie from cold to open and open to warm
 
@@ -56,20 +49,10 @@ DHTNEW tempsensor(14);
 
 //-----------------------------------------------------------------------------------------------------------------------------
 
-//Define our functions::
-// Converts resistance (in ohms) to temperature (in deg C)
-const float R1 = 4.7;  // Fixed resistor next to thermistor. 0 if not required.
-const float R2 = 2;  // Fixed resistor on other side of divider
-const float Vcc = 3.3;
-const float BETA = 1000;
-const float NOM_RESIST = 1000;
-const float NOM_TEMP = 1000;
-float resistanceToCelsius(float resistance) {
-  // Simplified Steinhart-Hart
-  float temp = log(resistance / NOM_RESIST) / BETA;
-  temp += 1.0 / (NOM_TEMP + 273.15);
-  temp = 1 / temp;
-  temp -= 273.15; // convert to C
+float temperature() {
+  tempsensor.read();
+  int temp = tempsensor.getTemperature();
+  //Serial.println(tempsensor.getTemperature(), 1);
   return temp;
 }
 
@@ -79,9 +62,6 @@ void setup(){
   motor.setAcceleration(100);
   motor.setMaxSpeed(500);
   //-------------------------------------------------------------------
-  //pinmodes A0 is LDR and .. is Thermistor
-  pinMode(14, INPUT);
-  //pinMode(, input); // fill this in ++++
 
   //internet connection
   Serial.begin(115200);
@@ -104,16 +84,11 @@ void setup(){
 void loop(){
   //get the temperature from the resistance
   Serial.println("Ha entrado en el loop"); //-- 
-  //float voltage = analogRead(A0); //--
-  float voltage = 4; //--
-  voltage = voltage / 1024;
-  float totalResistance = ((Vcc * R2) / voltage) - R2;
-  float resistance = (totalResistance - R1) * 1000;
-  T_inside = digitalRead(14); //resistanceToCelsius(resistance);
-  //Light = analogRead();
+  T_inside = temperature();
+  Light = analogRead(A0);
 
-  //Send an HTTP POST request every 20 seconds
-  delay(20000);
+  //Send an HTTP POST request every 10 seconds
+  delay(10000);
   if(WiFi.status()== WL_CONNECTED){
     Serial.println("Entrado en el if-statement, check"); //--
     HTTPClient http;
@@ -173,48 +148,57 @@ void loop(){
       
       //--------Here we do the actual logic for the blinds--------------------------------------------------------------------------------
       
-      if (Auto == 1){ //Automatic mode
-        if (Light > 40){ //100 is just an example i dint know what the cutoff is
-          If (T_inside > T_target){
-            // close on reflective ****
-          }
-          else if (T_inside < T_target){
-            // open ****
-          }
-          else {
-            continue;
-          }
-        }
-        else if (Light <= 40){
-          // close blinds on absorbant ****
-        }
+      if (Auto == 1) { //Automatic mode
+        position = automode();
 
       }
-      else if (Auto == 0){ //manual mode
-        if (Open = 1){
-          //open ****
-        }
-        else if (Open = 0){
-          if (Side = 0){ //reflect
-            //closed on reflect ****
-          }
-          else if (Side = 1){ //Absorb
-            // closed on absorb ****
-          }          
-        }
+      else if (Auto == 0) { //manual mode
+        position = manualmode();
       }
-
-
-      //-------------------------------------------------------------------------------------------------------------------------------------
+      motor.moveTo((position-prevposition)*revsbtwnstates*revolution);
     }
     Serial.println();
-
-
-
     http.end();
   }
   else {
     Serial.println("WiFi Disconnected");
   }
+  prevposition = position;
+  motor.run();
 }
 
+int automode() {
+  if (Light <= 40) { 
+    return 2;
+    // close blinds on absorbant ****
+  }
+  else if (T_inside > T_target) {
+    return 0;
+    // close on reflective **** 
+  }         
+  else if (T_inside < T_target) {
+    return 1;
+    // open ****
+  }
+  else {
+    return prevposition;
+  }
+}
+
+int manualmode() {
+  if (Open = 1) {
+    return 1;
+    //open ****
+  }
+  else if (Side = 0) {
+    return 0;
+    //closed on reflect ****
+  }
+  else if (Side = 1) { //Absorb
+    return 2;
+    // closed on absorb ****
+  }          
+  else {
+    return prevposition;
+  }
+}
