@@ -155,7 +155,7 @@ void loop(){
       else if (Auto == 0) { //manual mode
         position = manualmode();
       }
-      if (motor.distanceToGo() = 0) {
+      if (motor.distanceToGo() == 0) {
         motor.moveTo((position-prevposition)*revsbtwnstates*revolution);
         prevposition = position;
       }
@@ -188,15 +188,15 @@ int automode() {
 }
 
 int manualmode() {
-  if (Open = 1) {
+  if (Open == 1) {
     return 1;
     //open ****
   }
-  else if (Side = 0) {
+  else if (Side == 0) {
     return 0;
     //closed on reflect ****
   }
-  else if (Side = 1) { //Absorb
+  else if (Side == 1) { //Absorb
     return 2;
     // closed on absorb ****
   }          
