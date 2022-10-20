@@ -29,18 +29,16 @@ float T_outside = 0;
 //-----------------------------------------------------------------------your stuff--------------------------------------
 
 const int revolution = 4096;  
-//motor steps for a full revolution
+  //motor steps for a full revolution
 const int in1 = 5;
 const int in2 = 4;
 const int in3 = 0;
 const int in4 = 2 ;
-//pins on motor driver connected to micro controller
-int prevposition = 1;
-//must be updated before position is. Starts assuming blinds in open position
-int position = 2;
-// 0 = automatic, 1 = by target temp, 2 = manual
-const int revsbtwnstates = 2; 
-// revolutions of motor needed between states, ie from cold to open and open to warm
+  //pins on motor driver connected to micro controller
+const int pos-closed-a = 0;
+const int pos-closed-r = 1000; //make it even for simplicity
+const int pos-open = pos-closed-r/2
+  // define the distances
 
 //AccelStepper motor(AccelStepper::HALF4WIRE, in1, in3, in2, in4);
 //DHTNEW tempsensor(14);
@@ -51,6 +49,10 @@ void setup(){
   //----------------------------------------------------------------
   //motor.setAcceleration(100);
   //motor.setMaxSpeed(500);
+
+    //We will assume it starts on closed-absorbant, ans call this 0
+  //motor.setCurrentPosition(0);
+
   //-------------------------------------------------------------------
   //pinmodes A0 is LDR and 14 is Thermistor
   pinMode(14, INPUT);
@@ -146,16 +148,29 @@ void loop(){
               if (T_inside > T_target){
                 // close on reflective ****
                 Serial.println(" closed, reflective");
+                //motor.moveTo(pos-closed-r);
+                //delay(500);
+                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                  //motor.run();
+                }
               }
               else if (T_inside < T_target){
                 // open ****
                 Serial.println(" open");
+                //motor.moveTo(pos-open);
+                //delay(500);
+                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                  //motor.run();
               }
               
             }
             else if (Light <= 40){
               // close blinds on absorbant ****
               Serial.println(" closed, abs. Dark outside");
+              //motor.moveTo(pos-closed-a);
+                //delay(500);
+                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                  //motor.run();
             }
 
           }
@@ -163,15 +178,27 @@ void loop(){
             if (Open = 1){
               //open ****
               Serial.println(" open");
+              //motor.moveTo(pos-open);
+                //delay(500);
+                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                  //motor.run();
             }
             else if (Open = 0){
               if (Side = 0){ //reflect
                 //closed on reflect ****
                 Serial.println(" closed, reflective");
+                //motor.moveTo(pos-closed-r);
+                //delay(500);
+                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                  //motor.run();
               }
               else if (Side = 1){ //Absorb
                 // closed on absorb ****
                 Serial.println(" closed, abs");
+                //motor.moveTo(pos-closed-a);
+                //delay(500);
+                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                  //motor.run();
               }          
             }
           }
