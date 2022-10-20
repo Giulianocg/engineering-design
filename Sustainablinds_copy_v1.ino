@@ -155,7 +155,10 @@ void loop(){
       else if (Auto == 0) { //manual mode
         position = manualmode();
       }
-      motor.moveTo((position-prevposition)*revsbtwnstates*revolution);
+      if (motor.distanceToGo() = 0) {
+        motor.moveTo((position-prevposition)*revsbtwnstates*revolution);
+        prevposition = position;
+      }
     }
     Serial.println();
     http.end();
@@ -163,7 +166,6 @@ void loop(){
   else {
     Serial.println("WiFi Disconnected");
   }
-  prevposition = position;
   motor.run();
 }
 
