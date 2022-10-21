@@ -30,10 +30,10 @@ float T_outside = 0;
 
 const int revolution = 4096;  
   //motor steps for a full revolution
-const int in1 = 5;
-const int in2 = 4;
-const int in3 = 0;
-const int in4 = 2 ;
+const int in1 = 12;
+const int in2 = 13;
+const int in3 = 4;
+const int in4 = 5;
   //pins on motor driver connected to micro controller
 const int pos-closed-a = 0;
 const int pos-closed-r = 1000; //make it even for simplicity
@@ -54,9 +54,6 @@ void setup(){
   //motor.setCurrentPosition(0);
 
   //-------------------------------------------------------------------
-  //pinmodes A0 is LDR and 14 is Thermistor
-  pinMode(14, INPUT);
-  //pinMode(A0, input); // fill this in ++++
 
   //internet connection
   Serial.begin(115200);
@@ -79,12 +76,12 @@ void setup(){
 void loop(){
   //get the temperature 
   //tempsensor.read();
-  //T_inside = (tempsensor.getTemperature())/10;
+  //T_inside = tempsensor.getTemperature();
   T_inside = 13.9;//change this for now to test cases
 
 
   //get light
-  //Light = analogueRead(A0);
+  //Light = analogRead(A0);
   Light = 100; //change this for now to test cases
 
   Serial.println("Ha entrado en el loop"); //-- 
@@ -144,67 +141,61 @@ void loop(){
           //--------Here we do the actual logic for the blinds--------------------------------------------------------------------------------
           
           if (Auto == 1){ //Automatic mode
-            if (Light > 40){ //100 is just an example i dint know what the cutoff is
-              if (T_inside > T_target){
-                // close on reflective ****
-                Serial.println(" closed, reflective");
-                //motor.moveTo(pos-closed-r);
-                //delay(500);
-                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
-                  //motor.run();
-                }
-              }
-              else if (T_inside < T_target){
-                // open ****
-                Serial.println(" open");
-                //motor.moveTo(pos-open);
-                //delay(500);
-                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
-                  //motor.run();
-              }
-              
-            }
-            else if (Light <= 40){
+            if (Light <= 40) {
               // close blinds on absorbant ****
               Serial.println(" closed, abs. Dark outside");
               //motor.moveTo(pos-closed-a);
-                //delay(500);
-                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
-                  //motor.run();
+              //delay(500);
+              //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards. I doubt it.
+                //motor.run();
+              }
             }
-
-          }
-          else if (Auto == 0){ //manual mode
-            if (Open = 1){
-              //open ****
+            else if (T_inside > T_target){
+              // close on reflective ****
+              Serial.println(" closed, reflective");
+              //motor.moveTo(pos-closed-r);
+              //delay(500);
+              //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                //motor.run();
+              }
+            }
+            else if (T_inside < T_target){
+              // open ****
               Serial.println(" open");
               //motor.moveTo(pos-open);
-                //delay(500);
-                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
-                  //motor.run();
-            }
-            else if (Open = 0){
-              if (Side = 0){ //reflect
-                //closed on reflect ****
-                Serial.println(" closed, reflective");
-                //motor.moveTo(pos-closed-r);
-                //delay(500);
-                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
-                  //motor.run();
+              //delay(500);
+              //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+                //motor.run();
               }
-              else if (Side = 1){ //Absorb
-                // closed on absorb ****
-                Serial.println(" closed, abs");
-                //motor.moveTo(pos-closed-a);
-                //delay(500);
-                //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
-                  //motor.run();
-              }          
             }
           }
-
-
-
+          else if (Open = 1){
+            //open ****
+            Serial.println(" open");
+            //motor.moveTo(pos-open);
+            //delay(500);
+            //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+              //motor.run();
+            }
+          }
+          else  if (Side = 0){ //reflect
+            //closed on reflect ****
+            Serial.println(" closed, reflective");
+            //motor.moveTo(pos-closed-r);
+            //delay(500);
+            //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+              //motor.run();
+            }
+          }
+          else if (Side = 1){ //Absorb
+            // closed on absorb ****
+            Serial.println(" closed, abs");
+            //motor.moveTo(pos-closed-a);
+            //delay(500);
+            //while ((motor.distanceToGo() != 0)){          //double brackets? apparently but im not confdent, check afterwards.
+              //motor.run();
+            }         
+          }
         }
       } else {
         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
