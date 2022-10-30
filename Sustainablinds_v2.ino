@@ -3,15 +3,14 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 
-#include <iostream>
 #include <string>
 
 #include <AccelStepper.h>
 #include <dhtnew.h>
 
 
-const char* Wifi_name = "Giuliano";  //fill this in!!!!
-const char* Wifi_pass = "fuckyouman";
+const char* Wifi_name = "Alonso";  //fill this in!!!!
+const char* Wifi_pass = "onetwothree";
 const char* host = "engdesblinds.000webhostapp.com";
 
 // variables to send
@@ -26,34 +25,28 @@ int Auto = 0;
 int T_target = 0;
 float T_outside = 0;
 
-//-----------------------------------------------------------------------your stuff--------------------------------------
-
 const int revolution = 4096;
 //motor steps for a full revolution
-const int in1 = 12;
-const int in2 = 13;
-const int in3 = 4;
-const int in4 = 5;
+const int in1 = 12; //D6
+const int in2 = 13; //D7
+const int in3 = 4;  //D2
+const int in4 = 5;  //D1
 //pins on motor driver connected to micro controller
-const int poscloseda = 0;
-const int posclosedr = 1000;  //make it even for simplicity
-const int posopen = posclosedr / 2;
+const int poscloseda = 1820;
+const int posclosedr = 0;  //make it even for simplicity
+const int posopen = poscloseda / 2;
 // define the distances
 
 AccelStepper motor(AccelStepper::HALF4WIRE, in1, in3, in2, in4);
-DHTNEW tempsensor(14);
-
-//-----------------------------------------------------------------------------------------------------------------------------
+DHTNEW tempsensor(14);  //D5
 
 void setup() {
-  //----------------------------------------------------------------
   motor.setAcceleration(100);
   motor.setMaxSpeed(500);
 
   //We will assume it starts on closed-absorbant, ans call this 0
-  motor.setCurrentPosition(0);
+  motor.setCurrentPosition(posopen);
 
-  //-------------------------------------------------------------------
 
   //internet connection
   Serial.begin(115200);
@@ -76,23 +69,20 @@ void loop() {
   //get the temperature
   tempsensor.read();
   T_inside = tempsensor.getTemperature();
-  //T_inside = 13.9;//change this for now to test cases
-
 
   //get light
   Light = analogRead(A0);
-  //Light = 100; //change this for now to test cases
 
   Serial.println(Light);
   Serial.println(T_inside);
   Serial.println("Ha entrado en el loop");  //--
 
-  //Send an HTTP POST request every 20 seconds
-  delay(5000);
+  //Send an HTTP POST request every 5 seconds
+  delay(1000);
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("Entrado en el if-statement, check");  //--
-    HTTPClient http;
     WiFiClient client;
+    HTTPClient http;
 
     String url = "/TX.php?un=1&id=99999&pw='Password123456-'&n1=";
     url += String(T_inside);
@@ -131,8 +121,7 @@ void loop() {
           }
           arrayyy[icounter] = line;
 
-          Serial.println("Time: " + arrayyy[0] + " Mode: " + arrayyy[1] + " Side: " + arrayyy[2] + " Auto: " + arrayyy[3] + " T_target: " + arrayyy[4] + " T_outside: " + arrayyy[5]);
-          //motor.setCurrentPosition(0);
+          Serial.println("Time: " + arrayyy[0] + " Open: " + arrayyy[1] + " Side: " + arrayyy[2] + " Auto: " + arrayyy[3] + " T_target: " + arrayyy[4] + " T_outside: " + arrayyy[5]);
           Time = arrayyy[0].toInt();
           Open = arrayyy[1].toInt();
           Side = arrayyy[2].toInt();
@@ -148,7 +137,8 @@ void loop() {
               Serial.println(" closed, abs. Dark outside");
               motor.moveTo(poscloseda);
               delay(500);
-              while ((motor.distanceToGo() != 0)) {  //double brackets? apparently but im not confdent, check afterwards. I doubt it.
+              while ((motor.distanceToGo() != 0)) {
+                yield();
                 motor.run();
               }
             } else if (T_inside > T_target) {
@@ -156,61 +146,57 @@ void loop() {
               Serial.println(" closed, reflective");
               motor.moveTo(posclosedr);
               delay(500);
-              while ((motor.distanceToGo() != 0)) {  //double brackets? apparently but im not confdent, check afterwards.
+              while ((motor.distanceToGo() != 0)) {
+                yield();
                 motor.run();
               }
             } else if (T_inside < T_target) {
               // open ****
-              //Serial.println(" open");
-              //Serial.println("1");
+              Serial.println(" open");
               motor.moveTo(posopen);
-              //Serial.println("2");
               delay(500);
-              //Serial.println("3");
-              while (motor.distanceToGo() != 0) {  //double brackets? apparently but im not confdent, check afterwards.
-                Serial.println(motor.distanceToGo());
+              while (motor.distanceToGo() != 0) {
+                yield();
                 motor.run();
               }
-              Serial.println("4");
             }
-          } else if (Open = 1) {
+          } else if (Open == 1) {
             //open ****
             Serial.println(" open");
             motor.moveTo(posopen);
             delay(500);
-            while ((motor.distanceToGo() != 0)) {  //double brackets? apparently but im not confdent, check afterwards.
+            while ((motor.distanceToGo() != 0)) {
+              yield();
               motor.run();
             }
-          } else if (Side = 0) {  //reflect
+          } else if (Side == 0) {  //reflect
             //closed on reflect ****
             Serial.println(" closed, reflective");
             motor.moveTo(posclosedr);
             delay(500);
-            while ((motor.distanceToGo() != 0)) {  //double brackets? apparently but im not confdent, check afterwards.
+            while ((motor.distanceToGo() != 0)) {
+              yield();
               motor.run();
             }
-          } else if (Side = 1) {  //Absorb
+          } else if (Side == 1) {  //Absorb
             // closed on absorb ****
             Serial.println(" closed, abs");
             motor.moveTo(poscloseda);
             delay(500);
-            while ((motor.distanceToGo() != 0)) {  //double brackets? apparently but im not confdent, check afterwards.
+            while ((motor.distanceToGo() != 0)) {
+              yield();
               motor.run();
             }
           }
-          Serial.println("5");
         }
       } else {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        //Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
       }
-      Serial.println("6");
       http.end();
     } else {
       Serial.printf("[HTTP} Unable to connect\n");
     }
-    Serial.println("7");
   } else {
     Serial.println("WiFi Disconnected");
   }
-  Serial.println("8");
 }
